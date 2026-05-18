@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SistemaCAP · SUTRAN</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg2: #0f1526;
+  --bg3: #141c30;
+  --card: #111827;
+  --border: #1e2d4a;
+  --accent: #00c8ff;
+  --accent2: #0076ff;
+  --green: #00e676;
+  --yellow: #ffab00;
+  --red: #ff4757;
+  --text: #e8edf5;
+  --text2: #7a8ba8;
+  --text3: #4a5a72;
+  --font-head: 'Rajdhani', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;overflow-x:hidden;}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);position:fixed;inset:0;z-index:1000;}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:48px 40px;width:380px;box-shadow:0 0 60px rgba(0,200,255,0.08);}
+.login-logo{font-family:var(--font-head);font-size:28px;font-weight:700;color:var(--accent);letter-spacing:2px;margin-bottom:4px;}
+.login-sub{font-size:12px;color:var(--text2);margin-bottom:32px;letter-spacing:1px;}
+.login-box input{width:100%;padding:12px 16px;background:#0a0e1a;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:var(--font-body);margin-bottom:14px;outline:none;transition:.2s;}
+.login-box input:focus{border-color:var(--accent);}
+.btn-login{width:100%;padding:13px;background:var(--accent2);border:none;border-radius:8px;color:#fff;font-family:var(--font-head);font-size:16px;font-weight:600;letter-spacing:1px;cursor:pointer;transition:.2s;}
+.btn-login:hover{background:var(--accent);color:#000;}
+.login-err{color:var(--red);font-size:12px;margin-top:8px;display:none;}
+
+/* LAYOUT */
+#app{display:none;min-height:100vh;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
+.sidebar-logo .logo-text{font-family:var(--font-head);font-size:20px;font-weight:700;color:var(--accent);letter-spacing:2px;}
+.sidebar-logo .logo-sub{font-size:10px;color:var(--text2);letter-spacing:1px;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 0;}
+.nav-section{font-size:10px;color:var(--text3);letter-spacing:2px;padding:12px 20px 4px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;font-size:13px;color:var(--text2);transition:.15s;border-left:3px solid transparent;}
+.nav-item:hover{color:var(--text);background:var(--bg3);}
+.nav-item.active{color:var(--accent);background:rgba(0,200,255,0.06);border-left-color:var(--accent);}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;}
+.sidebar-user{padding:16px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--text2);}
+
+.main{margin-left:220px;padding:28px 32px;min-height:100vh;}
+.topbar{display:flex;align-items:center;justify-content:between;margin-bottom:28px;}
+.page-title{font-family:var(--font-head);font-size:26px;font-weight:700;color:var(--text);letter-spacing:1px;}
+.page-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+
+/* CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);}
+.stat-card.green::before{background:var(--green);}
+.stat-card.yellow::before{background:var(--yellow);}
+.stat-card.red::before{background:var(--red);}
+.stat-num{font-family:var(--font-head);font-size:36px;font-weight:700;color:var(--text);}
+.stat-label{font-size:11px;color:var(--text2);margin-top:4px;letter-spacing:.5px;}
+
+/* TABLES */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.table-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.table-head h3{font-family:var(--font-head);font-size:16px;font-weight:600;color:var(--text);}
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg3);}
+td{padding:11px 16px;font-size:13px;color:var(--text);border-bottom:1px solid rgba(30,45,74,.5);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(0,200,255,0.02);}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;}
+.badge-green{background:rgba(0,230,118,.12);color:var(--green);}
+.badge-red{background:rgba(255,71,87,.12);color:var(--red);}
+.badge-yellow{background:rgba(255,171,0,.12);color:var(--yellow);}
+.badge-blue{background:rgba(0,200,255,.12);color:var(--accent);}
+
+/* FORMS */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.form-grid.cols3{grid-template-columns:repeat(3,1fr);}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group label{font-size:11px;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;}
+.form-group input,.form-group select{padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:var(--font-body);outline:none;transition:.2s;}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent);}
+.form-group select option{background:var(--bg2);}
+
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-family:var(--font-head);font-size:14px;font-weight:600;letter-spacing:.5px;transition:.2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--accent2);color:#fff;}
+.btn-primary:hover{background:var(--accent);color:#000;}
+.btn-success{background:rgba(0,230,118,.15);color:var(--green);border:1px solid rgba(0,230,118,.3);}
+.btn-success:hover{background:rgba(0,230,118,.25);}
+.btn-danger{background:rgba(255,71,87,.15);color:var(--red);border:1px solid rgba(255,71,87,.3);}
+.btn-danger:hover{background:rgba(255,71,87,.25);}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{color:var(--text);border-color:var(--text2);}
+.btn-sm{padding:5px 12px;font-size:12px;}
+
+/* SEARCH */
+.search-input{padding:9px 14px 9px 36px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none;width:240px;transition:.2s;}
+.search-input:focus{border-color:var(--accent);width:280px;}
+.search-wrap{position:relative;}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);width:14px;height:14px;}
+
+/* TABS */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:20px;}
+.tab{padding:10px 18px;cursor:pointer;font-size:13px;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;width:600px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.modal-title{font-family:var(--font-head);font-size:20px;font-weight:700;margin-bottom:20px;color:var(--text);}
+
+/* ALERTS */
+.alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;}
+.alert-success{background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green);}
+.alert-error{background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);color:var(--red);}
+.alert-info{background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.3);color:var(--accent);}
+
+/* PAGE SECTIONS */
+.section{display:none;}
+.section.active{display:block;}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;gap:8px;padding:16px 20px;border-top:1px solid var(--border);}
+.page-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:12px;}
+.page-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent2);}
+.page-info{font-size:12px;color:var(--text2);margin-left:auto;}
+
+/* CSV UPLOAD */
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:.2s;}
+.upload-zone:hover{border-color:var(--accent);background:rgba(0,200,255,.03);}
+.upload-zone.drag{border-color:var(--accent);background:rgba(0,200,255,.05);}
+
+/* UD BADGE colors */
+.ud-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(0,118,255,.15);color:#60a5fa;}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">SISTEMA CAP</div>
+    <div class="login-sub">GESTIÓN DE INSPECTORES · SUTRAN</div>
+    <input type="text" id="login-user" placeholder="Usuario" />
+    <input type="password" id="login-pass" placeholder="Contraseña" />
+    <button class="btn-login" onclick="doLogin()">INGRESAR</button>
+    <div class="login-err" id="login-err">Usuario o contraseña incorrectos</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">SISTEMA CAP</div>
+      <div class="logo-sub">SUTRAN · GESTIÓN</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" onclick="goTo('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-section">Personal</div>
+      <div class="nav-item" onclick="goTo('personal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Inspectores
+      </div>
+      <div class="nav-item" onclick="goTo('registrar')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Registrar
+      </div>
+      <div class="nav-item" onclick="goTo('carga-csv')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Carga Masiva CSV
+      </div>
+      <div class="nav-section">Gestión</div>
+      <div class="nav-item" onclick="goTo('acreditaciones')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Acreditaciones
+      </div>
+      <div class="nav-item" onclick="goTo('instrucciones')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Instrucciones
+      </div>
+      <div class="nav-section">Reportes</div>
+      <div class="nav-item" onclick="goTo('reportes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Reportes
+      </div>
+      <div class="nav-item" onclick="goTo('exportar')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar
+      </div>
+      <div class="nav-section">Sistema</div>
+      <div class="nav-item" onclick="goTo('carga-json')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        Carga Histórica JSON
+      </div>
+      <div class="nav-item" onclick="goTo('usuarios')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+        Usuarios
+      </div>
+    </nav>
+    <div class="sidebar-user" id="sidebar-user">—</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="sec-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub" style="margin-bottom:24px">Vista general del sistema</div>
+      <div class="stat-grid" id="dash-stats"></div>
+      <div class="table-wrap">
+        <div class="table-head"><h3>Personal por Unidad Desconcentrada</h3></div>
+        <table id="dash-ud-table">
+          <thead><tr><th>UD</th><th>Total</th><th>Activos</th><th>Con Cese</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PERSONAL -->
+    <div class="section" id="sec-personal">
+      <div class="page-title">Inspectores</div>
+      <div class="page-sub" style="margin-bottom:20px">Consulta y gestión de personal registrado</div>
+      <div class="table-wrap">
+        <div class="table-head">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-input" id="search-personal" placeholder="Buscar DNI, apellidos..." oninput="filterPersonal()">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="filter-ud" style="padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;outline:none;" onchange="filterPersonal()">
+              <option value="">Todas las UDs</option>
+            </select>
+            <button class="btn btn-success btn-sm" onclick="exportCSV()">Exportar CSV</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table id="personal-table">
+            <thead><tr><th>DNI</th><th>Apellidos</th><th>Nombres</th><th>UD</th><th>Cargo</th><th>Ingreso</th><th>Condición</th><th>Nivel</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="personal-tbody"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="personal-pagination"></div>
+      </div>
+    </div>
+
+    <!-- REGISTRAR -->
+    <div class="section" id="sec-registrar">
+      <div class="page-title">Registrar Inspector</div>
+      <div class="page-sub" style="margin-bottom:20px">Añade un nuevo inspector al sistema</div>
+      <div id="reg-alert"></div>
+      <div class="form-card">
+        <div class="form-grid" style="margin-bottom:16px">
+          <div class="form-group"><label>DNI *</label><input id="r-dni" placeholder="8 dígitos" maxlength="8"></div>
+          <div class="form-group"><label>Apellidos *</label><input id="r-ape" placeholder="Apellido Paterno Materno"></div>
+          <div class="form-group"><label>Nombres *</label><input id="r-nom" placeholder="Nombres completos"></div>
+          <div class="form-group"><label>UD *</label>
+            <select id="r-ud"><option value="">Seleccionar UD...</option></select>
+          </div>
+          <div class="form-group"><label>Cargo</label><input id="r-cargo" placeholder="Cargo o puesto"></div>
+          <div class="form-group"><label>Fecha Ingreso</label><input id="r-ingreso" type="date"></div>
+          <div class="form-group"><label>Fecha Cese</label><input id="r-cese" type="date"></div>
+          <div class="form-group"><label>Condición</label>
+            <select id="r-cond"><option value="">—</option><option>CAS</option><option>Nombrado</option><option>Locador</option></select>
+          </div>
+          <div class="form-group"><label>Nivel de Estudios</label>
+            <select id="r-nivel"><option value="">—</option><option>Técnico</option><option>Bachiller</option><option>Título Profesional</option><option>Universitario Completo</option><option>Maestría</option><option>Doctorado</option></select>
+          </div>
+          <div class="form-group"><label>Carrera Profesional</label><input id="r-carrera" placeholder="Ej: Derecho"></div>
+          <div class="form-group"><label>Celular</label><input id="r-cel" placeholder="9XXXXXXXX"></div>
+          <div class="form-group"><label>Sexo</label>
+            <select id="r-sexo"><option value="">—</option><option>MASCULINO</option><option>FEMENINO</option></select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="guardarInspector()">Guardar Inspector</button>
+          <button class="btn btn-ghost" onclick="limpiarForm()">Limpiar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARGA CSV -->
+    <div class="section" id="sec-carga-csv">
+      <div class="page-title">Carga Masiva CSV</div>
+      <div class="page-sub" style="margin-bottom:20px">Importa personal desde un archivo CSV</div>
+      <div class="form-card" style="margin-bottom:20px">
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+          <div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Separador CSV</div>
+            <select id="csv-sep" style="padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none;">
+              <option value=";">; (punto y coma)</option>
+              <option value=",">, (coma)</option>
+              <option value="&#9;">Tab</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Codificación</div>
+            <select id="csv-enc" style="padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none;">
+              <option value="utf-8">UTF-8</option>
+              <option value="latin1">ISO-8859-1</option>
+            </select>
+          </div>
+          <div style="margin-top:20px">
+            <button class="btn btn-ghost btn-sm" onclick="descargarPlantillaCSV()">Descargar Plantilla CSV</button>
+          </div>
+        </div>
+        <div class="upload-zone" id="csv-drop" onclick="document.getElementById('csv-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="dropCSV(event)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;height:40px;color:var(--text3);margin-bottom:12px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div style="font-size:14px;color:var(--text2)">Arrastra tu CSV aquí o haz clic</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:4px">Columnas: DNI, Apellidos, Nombres, UD, Cargo, Ingreso, Cese, Condicion, Nivel, Carrera, Celular, Sexo</div>
+        </div>
+        <input type="file" id="csv-file" accept=".csv" style="display:none" onchange="cargarCSV(this)">
+      </div>
+      <div id="csv-preview" style="display:none">
+        <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">
+          <div class="stat-card" style="flex:1;min-width:120px"><div class="stat-num" id="csv-nuevos" style="color:var(--green)">0</div><div class="stat-label">Nuevos</div></div>
+          <div class="stat-card" style="flex:1;min-width:120px"><div class="stat-num" id="csv-dupes" style="color:var(--yellow)">0</div><div class="stat-label">Duplicados</div></div>
+          <div class="stat-card" style="flex:1;min-width:120px"><div class="stat-num" id="csv-errors" style="color:var(--red)">0</div><div class="stat-label">Con error</div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head">
+            <h3>Vista previa</h3>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost btn-sm" onclick="cancelarCSV()">← Volver</button>
+              <button class="btn btn-primary" onclick="confirmarCSV()">Registrar en BD</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto"><table id="csv-table"><thead><tr><th>#</th><th>Estado</th><th>DNI</th><th>Apellidos</th><th>Nombres</th><th>UD</th><th>Cargo</th><th>Ingreso</th><th>Condición</th></tr></thead><tbody id="csv-tbody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACREDITACIONES -->
+    <div class="section" id="sec-acreditaciones">
+      <div class="page-title">Acreditaciones</div>
+      <div class="page-sub" style="margin-bottom:20px">Registro y consulta de acreditaciones</div>
+      <div class="tabs">
+        <div class="tab active" onclick="acredTab(0,this)">Registrar</div>
+        <div class="tab" onclick="acredTab(1,this)">Consultar</div>
+      </div>
+      <div id="acred-tab-0">
+        <div id="acred-alert"></div>
+        <div class="form-card">
+          <div class="form-grid" style="margin-bottom:16px">
+            <div class="form-group"><label>DNI Inspector *</label><input id="a-dni" placeholder="DNI del inspector" oninput="buscarInspAcred()"></div>
+            <div class="form-group"><label>Inspector</label><input id="a-nombre" readonly style="opacity:.6"></div>
+            <div class="form-group"><label>Materia *</label>
+              <select id="a-materia">
+                <option value="">Seleccionar...</option>
+                <option value="TP">Fiscalización de Servicios de Transporte (TP)</option>
+                <option value="SC">Fiscalización de Servicios Complementarios (SC)</option>
+                <option value="PM">Fiscalización de Pesos y Medidas (PM)</option>
+                <option value="TR">Fiscalización de Tránsito (TR)</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Código SU</label><input id="a-codigo" placeholder="SU000000"></div>
+            <div class="form-group"><label>Resolución N°</label><input id="a-resolucion" placeholder="RD-000-2026-SUTRAN"></div>
+            <div class="form-group"><label>Fecha Emisión</label><input id="a-fecha" type="date"></div>
+            <div class="form-group"><label>Nota Teórica</label><input id="a-nota-teo" type="number" min="0" max="20" placeholder="0-20"></div>
+            <div class="form-group"><label>Nota Práctica</label><input id="a-nota-pra" type="number" min="0" max="20" placeholder="0-20"></div>
+          </div>
+          <button class="btn btn-primary" onclick="guardarAcred()">Guardar Acreditación</button>
+        </div>
+      </div>
+      <div id="acred-tab-1" style="display:none">
+        <div class="table-wrap">
+          <div class="table-head">
+            <div class="search-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="search-input" id="search-acred" placeholder="Buscar DNI..." oninput="filtrarAcred()">
+            </div>
+            <button class="btn btn-success btn-sm" onclick="exportAcredCSV()">Exportar CSV</button>
+          </div>
+          <div style="overflow-x:auto"><table id="acred-table"><thead><tr><th>DNI</th><th>Inspector</th><th>UD</th><th>Materia</th><th>Código SU</th><th>Resolución</th><th>Fecha</th><th>Nota Teo.</th><th>Nota Prá.</th></tr></thead><tbody id="acred-tbody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSTRUCCIONES -->
+    <div class="section" id="sec-instrucciones">
+      <div class="page-title">Instrucciones de Capacitación</div>
+      <div class="page-sub" style="margin-bottom:20px">Programa y gestiona instrucciones</div>
+      <div class="tabs">
+        <div class="tab active" onclick="instrTab(0,this)">Nueva Instrucción</div>
+        <div class="tab" onclick="instrTab(1,this)">Lista</div>
+      </div>
+      <div id="instr-tab-0">
+        <div id="instr-alert"></div>
+        <div class="form-card">
+          <div class="form-grid" style="margin-bottom:16px">
+            <div class="form-group"><label>Tipo *</label>
+              <select id="i-tipo">
+                <option value="">Seleccionar...</option>
+                <option>Instrucción para la Acreditación</option>
+                <option>Instrucción para la Renovación</option>
+                <option>Fortalecimiento de Capacidades</option>
+                <option>Acompañamiento Técnico</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Materia *</label>
+              <select id="i-materia">
+                <option value="">Seleccionar...</option>
+                <option value="TP">Fiscalización de Servicios de Transporte</option>
+                <option value="SC">Fiscalización de Servicios Complementarios</option>
+                <option value="PM">Fiscalización de Pesos y Medidas</option>
+                <option value="TR">Fiscalización de Tránsito</option>
+              </select>
+            </div>
+            <div class="form-group"><label>UD Destinataria</label><select id="i-ud"><option value="">Seleccionar UD...</option></select></div>
+            <div class="form-group"><label>Modalidad</label>
+              <select id="i-modalidad"><option>Virtual</option><option>Presencial</option><option>Híbrida</option></select>
+            </div>
+            <div class="form-group"><label>Fecha Inicio</label><input id="i-inicio" type="date"></div>
+            <div class="form-group"><label>Fecha Fin</label><input id="i-fin" type="date"></div>
+          </div>
+          <button class="btn btn-primary" onclick="guardarInstr()">Guardar Instrucción</button>
+        </div>
+      </div>
+      <div id="instr-tab-1" style="display:none">
+        <div class="table-wrap">
+          <div style="overflow-x:auto"><table id="instr-table"><thead><tr><th>Código</th><th>Tipo</th><th>Materia</th><th>UD</th><th>Modalidad</th><th>Inicio</th><th>Fin</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="instr-tbody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTES -->
+    <div class="section" id="sec-reportes">
+      <div class="page-title">Reportes</div>
+      <div class="page-sub" style="margin-bottom:20px">Resúmenes y estadísticas del sistema</div>
+      <div class="stat-grid" id="rep-stats"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:4px">
+        <div class="table-wrap">
+          <div class="table-head"><h3>Personal por UD</h3></div>
+          <table><thead><tr><th>UD</th><th>Total</th><th>Activos</th></tr></thead><tbody id="rep-ud-tbody"></tbody></table>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head"><h3>Acreditaciones por Materia</h3></div>
+          <table><thead><tr><th>Materia</th><th>Total</th></tr></thead><tbody id="rep-acred-tbody"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPORTAR -->
+    <div class="section" id="sec-exportar">
+      <div class="page-title">Exportar Datos</div>
+      <div class="page-sub" style="margin-bottom:20px">Descarga registros en CSV o JSON</div>
+      <div class="form-card">
+        <div class="form-grid" style="margin-bottom:20px">
+          <div class="form-group"><label>Filtrar por UD</label><select id="exp-ud"><option value="">Todas las UDs</option></select></div>
+          <div class="form-group"><label>Filtrar por Estado</label>
+            <select id="exp-estado"><option value="">Todos</option><option value="activo">Solo Activos</option><option value="cese">Con Cese</option></select>
+          </div>
+        </div>
+        <div id="exp-count" style="font-size:13px;color:var(--text2);margin-bottom:16px">Registros a exportar: —</div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="exportarCSVFull()">Exportar CSV</button>
+          <button class="btn btn-ghost" onclick="exportarJSON()">Exportar JSON</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARGA JSON -->
+    <div class="section" id="sec-carga-json">
+      <div class="page-title">Carga de Datos Históricos</div>
+      <div class="page-sub" style="margin-bottom:20px">Importa datos desde un archivo JSON estructurado</div>
+      <div class="alert alert-info" style="margin-bottom:20px">⚠️ Esta operación <strong>reemplaza todos los datos actuales</strong>. Haz un backup primero.</div>
+      <div class="form-card">
+        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="backupJSON()">Backup actual</button>
+          <button class="btn btn-ghost" onclick="descargarPlantillaJSON()">Descargar Plantilla JSON</button>
+        </div>
+        <div class="upload-zone" onclick="document.getElementById('json-file').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;height:40px;color:var(--text3);margin-bottom:12px"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          <div style="font-size:14px;color:var(--text2)">Haz clic para seleccionar el archivo JSON</div>
+        </div>
+        <input type="file" id="json-file" accept=".json" style="display:none" onchange="cargarJSON(this)">
+        <div id="json-alert" style="margin-top:16px"></div>
+      </div>
+    </div>
+
+    <!-- USUARIOS -->
+    <div class="section" id="sec-usuarios">
+      <div class="page-title">Usuarios del Sistema</div>
+      <div class="page-sub" style="margin-bottom:20px">Gestión de accesos y contraseñas</div>
+      <div id="usr-alert"></div>
+      <div class="form-card" style="margin-bottom:20px">
+        <div style="font-family:var(--font-head);font-size:15px;margin-bottom:16px;color:var(--text)">Nuevo Usuario</div>
+        <div class="form-grid" style="margin-bottom:16px">
+          <div class="form-group"><label>Usuario *</label><input id="u-user" placeholder="nombre_usuario"></div>
+          <div class="form-group"><label>Contraseña *</label><input id="u-pass" type="password" placeholder="Contraseña"></div>
+          <div class="form-group"><label>Nombre Completo</label><input id="u-nombre" placeholder="Nombre visible"></div>
+          <div class="form-group"><label>Rol</label>
+            <select id="u-rol"><option value="admin">Administrador</option><option value="viewer">Visualizador</option></select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="guardarUsuario()">Guardar Usuario</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head"><h3>Usuarios Registrados</h3></div>
+        <table><thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Acciones</th></tr></thead><tbody id="usr-tbody"></tbody></table>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- MODAL EDITAR -->
+<div class="modal-bg" id="modal-edit">
+  <div class="modal">
+    <div class="modal-title">Editar Inspector</div>
+    <input type="hidden" id="edit-dni-orig">
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="form-group"><label>DNI</label><input id="edit-dni" readonly style="opacity:.6"></div>
+      <div class="form-group"><label>Apellidos</label><input id="edit-ape"></div>
+      <div class="form-group"><label>Nombres</label><input id="edit-nom"></div>
+      <div class="form-group"><label>UD</label><select id="edit-ud"></select></div>
+      <div class="form-group"><label>Cargo</label><input id="edit-cargo"></div>
+      <div class="form-group"><label>Fecha Ingreso</label><input id="edit-ingreso" type="date"></div>
+      <div class="form-group"><label>Fecha Cese</label><input id="edit-cese" type="date"></div>
+      <div class="form-group"><label>Condición</label><select id="edit-cond"><option value="">—</option><option>CAS</option><option>Nombrado</option><option>Locador</option></select></div>
+      <div class="form-group"><label>Nivel</label><select id="edit-nivel"><option value="">—</option><option>Técnico</option><option>Bachiller</option><option>Título Profesional</option><option>Universitario Completo</option><option>Maestría</option><option>Doctorado</option></select></div>
+      <div class="form-group"><label>Carrera</label><input id="edit-carrera"></div>
+      <div class="form-group"><label>Celular</label><input id="edit-cel"></div>
+      <div class="form-group"><label>Sexo</label><select id="edit-sexo"><option value="">—</option><option>MASCULINO</option><option>FEMENINO</option></select></div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="guardarEdicion()">Guardar Cambios</button>
+      <button class="btn btn-ghost" onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =========== DATA STORE ===========
+const UDS = ['Amazonas','Áncash','Apurímac','Arequipa','Ayacucho','Cajamarca','Cusco','Huánuco','Ica','Junín','La Libertad','Lambayeque','Lima-Callao','Madre de Dios','Moquegua','Pasco','Piura','Puno','San Martín','Tacna','Tumbes','Ucayali'];
+
+function getData(key, def={}){try{const v=localStorage.getItem(key);return v?JSON.parse(v):def;}catch{return def;}}
+function setData(key, val){localStorage.setItem(key, JSON.stringify(val));}
+
+function getPersonal(){return getData('personalDB',{});}
+function setPersonal(d){setData('personalDB',d);}
+function getAcred(){return getData('acredDB',{});}
+function setAcred(d){setData('acredDB',d);}
+function getInstr(){return getData('instrDB',[]);}
+function setInstr(d){setData('instrDB',d);}
+function getUsuarios(){return getData('usuariosDB',{'admin':{'pass':'admin123','nombre':'Administrador','rol':'admin'}});}
+function setUsuarios(d){setData('usuariosDB',d);}
+
+// =========== LOGIN ===========
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value.trim();
+  const users=getUsuarios();
+  if(users[u] && users[u].pass===p){
+    setData('currentUser',{user:u,...users[u]});
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('sidebar-user').innerHTML=`<div style="font-weight:500;color:var(--text)">${users[u].nombre||u}</div><div style="font-size:11px;color:var(--text3)">${users[u].rol||'—'}</div>`;
+    initApp();
+  } else {
+    document.getElementById('login-err').style.display='block';
+  }
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// Check session
+window.onload=()=>{
+  const cu=getData('currentUser',null);
+  if(cu && cu.user){
+    const users=getUsuarios();
+    if(users[cu.user]){
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('app').style.display='block';
+      document.getElementById('sidebar-user').innerHTML=`<div style="font-weight:500;color:var(--text)">${cu.nombre||cu.user}</div><div style="font-size:11px;color:var(--text3)">${cu.rol||'—'}</div>`;
+      initApp();
+    }
+  }
+};
+
+// =========== NAVIGATION ===========
+let currentSection='dashboard';
+function goTo(sec){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+sec).classList.add('active');
+  event.currentTarget.classList.add('active');
+  currentSection=sec;
+  if(sec==='dashboard')renderDashboard();
+  if(sec==='personal')renderPersonal();
+  if(sec==='acreditaciones')renderAcredConsulta();
+  if(sec==='instrucciones')renderInstrLista();
+  if(sec==='reportes')renderReportes();
+  if(sec==='exportar')renderExportar();
+  if(sec==='usuarios')renderUsuarios();
+}
+
+// =========== INIT ===========
+function initApp(){
+  // Poblar selects UD
+  UDS.forEach(ud=>{
+    ['r-ud','i-ud','filter-ud','edit-ud','exp-ud'].forEach(id=>{
+      const s=document.getElementById(id);
+      if(s){const o=document.createElement('option');o.value=ud;o.textContent=ud;s.appendChild(o);}
+    });
+  });
+  renderDashboard();
+}
+
+// =========== DASHBOARD ===========
+function renderDashboard(){
+  const p=getPersonal();
+  const vals=Object.values(p);
+  const total=vals.length;
+  const activos=vals.filter(v=>!v.cese).length;
+  const cese=vals.filter(v=>v.cese).length;
+  const acred=Object.keys(getAcred()).length;
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total Personal</div></div>
+    <div class="stat-card green"><div class="stat-num" style="color:var(--green)">${activos}</div><div class="stat-label">Activos</div></div>
+    <div class="stat-card red"><div class="stat-num" style="color:var(--red)">${cese}</div><div class="stat-label">Con Cese</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${acred}</div><div class="stat-label">Acreditados</div></div>`;
+  // UD table
+  const byUD={};
+  vals.forEach(v=>{
+    const ud=v.ud||'Sin UD';
+    if(!byUD[ud])byUD[ud]={total:0,activos:0,cese:0};
+    byUD[ud].total++;
+    if(v.cese)byUD[ud].cese++;else byUD[ud].activos++;
+  });
+  const tb=document.querySelector('#dash-ud-table tbody');
+  tb.innerHTML=Object.entries(byUD).sort((a,b)=>b[1].total-a[1].total).map(([ud,d])=>`
+    <tr><td><span class="ud-badge">${ud}</span></td><td>${d.total}</td><td style="color:var(--green)">${d.activos}</td><td style="color:var(--red)">${d.cese}</td></tr>`).join('');
+}
+
+// =========== PERSONAL ===========
+let personalPage=1; const PER_PAGE=20;
+let personalFiltered=[];
+
+function renderPersonal(){
+  filterPersonal();
+}
+
+function filterPersonal(){
+  const p=getPersonal();
+  const q=(document.getElementById('search-personal').value||'').toLowerCase();
+  const ud=(document.getElementById('filter-ud').value||'');
+  personalFiltered=Object.entries(p).filter(([dni,v])=>{
+    const match=!q||(dni.includes(q)||((v.apellidos||'').toLowerCase().includes(q))||((v.nombres||'').toLowerCase().includes(q)));
+    const matchUD=!ud||(v.ud===ud);
+    return match&&matchUD;
+  });
+  personalPage=1;
+  renderPersonalTable();
+}
+
+function renderPersonalTable(){
+  const start=(personalPage-1)*PER_PAGE;
+  const slice=personalFiltered.slice(start,start+PER_PAGE);
+  const tb=document.getElementById('personal-tbody');
+  tb.innerHTML=slice.map(([dni,v])=>`
+    <tr>
+      <td style="font-family:var(--font-head);letter-spacing:1px">${dni}</td>
+      <td>${v.apellidos||'—'}</td>
+      <td>${v.nombres||'—'}</td>
+      <td><span class="ud-badge">${v.ud||'—'}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${v.cargo||'—'}</td>
+      <td style="font-size:12px">${v.ingreso||'—'}</td>
+      <td><span class="badge ${v.condicion==='CAS'?'badge-blue':'badge-green'}">${v.condicion||'—'}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${v.nivel||'—'}</td>
+      <td><span class="badge ${v.cese?'badge-red':'badge-green'}">${v.cese?'Cesado':'Activo'}</span></td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="abrirEditar('${dni}')">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminarInsp('${dni}')">✕</button>
+      </td>
+    </tr>`).join('');
+  renderPagination();
+}
+
+function renderPagination(){
+  const total=personalFiltered.length;
+  const pages=Math.ceil(total/PER_PAGE);
+  const pg=document.getElementById('personal-pagination');
+  let html='';
+  for(let i=1;i<=Math.min(pages,10);i++){
+    html+=`<button class="page-btn ${i===personalPage?'active':''}" onclick="setPage(${i})">${i}</button>`;
+  }
+  html+=`<span class="page-info">${total} registros</span>`;
+  pg.innerHTML=html;
+}
+
+function setPage(n){personalPage=n;renderPersonalTable();}
+
+function eliminarInsp(dni){
+  if(!confirm('¿Eliminar este inspector?'))return;
+  const p=getPersonal();delete p[dni];setPersonal(p);filterPersonal();
+}
+
+// =========== REGISTRAR ===========
+function guardarInspector(){
+  const dni=document.getElementById('r-dni').value.trim();
+  const ape=document.getElementById('r-ape').value.trim();
+  const nom=document.getElementById('r-nom').value.trim();
+  const ud=document.getElementById('r-ud').value;
+  if(!dni||!ape||!nom||!ud){showAlert('reg-alert','Completa los campos obligatorios (DNI, Apellidos, Nombres, UD)','error');return;}
+  if(!/^\d{8}$/.test(dni)){showAlert('reg-alert','El DNI debe tener exactamente 8 dígitos','error');return;}
+  const p=getPersonal();
+  const isNew=!p[dni];
+  p[dni]={apellidos:ape,nombres:nom,ud,cargo:document.getElementById('r-cargo').value.trim(),ingreso:document.getElementById('r-ingreso').value,cese:document.getElementById('r-cese').value,condicion:document.getElementById('r-cond').value,nivel:document.getElementById('r-nivel').value,carrera:document.getElementById('r-carrera').value.trim(),celular:document.getElementById('r-cel').value.trim(),sexo:document.getElementById('r-sexo').value};
+  setPersonal(p);
+  showAlert('reg-alert',isNew?'Inspector registrado correctamente':'Inspector actualizado correctamente','success');
+  limpiarForm();
+}
+
+function limpiarForm(){
+  ['r-dni','r-ape','r-nom','r-cargo','r-ingreso','r-cese','r-carrera','r-cel'].forEach(id=>document.getElementById(id).value='');
+  ['r-ud','r-cond','r-nivel','r-sexo'].forEach(id=>document.getElementById(id).selectedIndex=0);
+}
+
+// =========== EDITAR ===========
+function abrirEditar(dni){
+  const p=getPersonal();const v=p[dni];
+  document.getElementById('edit-dni-orig').value=dni;
+  document.getElementById('edit-dni').value=dni;
+  document.getElementById('edit-ape').value=v.apellidos||'';
+  document.getElementById('edit-nom').value=v.nombres||'';
+  setSelectVal('edit-ud',v.ud);
+  document.getElementById('edit-cargo').value=v.cargo||'';
+  document.getElementById('edit-ingreso').value=v.ingreso||'';
+  document.getElementById('edit-cese').value=v.cese||'';
+  setSelectVal('edit-cond',v.condicion);
+  setSelectVal('edit-nivel',v.nivel);
+  document.getElementById('edit-carrera').value=v.carrera||'';
+  document.getElementById('edit-cel').value=v.celular||'';
+  setSelectVal('edit-sexo',v.sexo);
+  document.getElementById('modal-edit').classList.add('open');
+}
+
+function setSelectVal(id,val){
+  const s=document.getElementById(id);
+  for(let i=0;i<s.options.length;i++){if(s.options[i].value===val||s.options[i].text===val){s.selectedIndex=i;return;}}
+}
+
+function guardarEdicion(){
+  const dniOrig=document.getElementById('edit-dni-orig').value;
+  const p=getPersonal();
+  p[dniOrig]={apellidos:document.getElementById('edit-ape').value.trim(),nombres:document.getElementById('edit-nom').value.trim(),ud:document.getElementById('edit-ud').value,cargo:document.getElementById('edit-cargo').value.trim(),ingreso:document.getElementById('edit-ingreso').value,cese:document.getElementById('edit-cese').value,condicion:document.getElementById('edit-cond').value,nivel:document.getElementById('edit-nivel').value,carrera:document.getElementById('edit-carrera').value.trim(),celular:document.getElementById('edit-cel').value.trim(),sexo:document.getElementById('edit-sexo').value};
+  setPersonal(p);cerrarModal();filterPersonal();
+}
+
+function cerrarModal(){document.getElementById('modal-edit').classList.remove('open');}
+document.getElementById('modal-edit').addEventListener('click',e=>{if(e.target===e.currentTarget)cerrarModal();});
+
+// =========== CSV CARGA ===========
+let csvParsed=[];
+
+function descargarPlantillaCSV(){
+  const header='DNI;Apellidos;Nombres;UD;Cargo;Ingreso;Cese;Condicion;Nivel;Carrera;Celular;Sexo';
+  const ex='12345678;Garcia Lopez;Juan Carlos;Lima-Callao;Inspector;2024-01-15;;CAS;Bachiller;Derecho;987654321;MASCULINO';
+  downloadFile('plantilla_personal.csv', header+'\n'+ex, 'text/csv');
+}
+
+function dropCSV(e){e.preventDefault();document.getElementById('csv-drop').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)procesarCSV(f);}
+function cargarCSV(input){if(input.files[0])procesarCSV(input.files[0]);}
+
+function procesarCSV(file){
+  const sep=document.getElementById('csv-sep').value;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    let text=e.target.result;
+    // Remove BOM
+    if(text.charCodeAt(0)===0xFEFF)text=text.slice(1);
+    const lines=text.split('\n').filter(l=>l.trim());
+    const headers=lines[0].split(sep).map(h=>h.trim().toLowerCase().replace(/[^a-záéíóúñ]/gi,''));
+    const p=getPersonal();
+    csvParsed=[];
+    let nuevos=0,dupes=0,errors=0;
+    for(let i=1;i<lines.length;i++){
+      const cols=lines[i].split(sep).map(c=>c.trim().replace(/^"|"$/g,''));
+      const row={};
+      headers.forEach((h,idx)=>row[h]=cols[idx]||'');
+      const dni=(row.dni||row['dni']||'').replace(/\D/g,'').padStart(8,'0');
+      let estado,estadoLabel;
+      if(!dni||dni.length!==8){estado='error';estadoLabel='<span class="badge badge-red">Error DNI</span>';errors++;}
+      else if(p[dni]){estado='dupe';estadoLabel='<span class="badge badge-yellow">Duplicado</span>';dupes++;}
+      else{estado='new';estadoLabel='<span class="badge badge-green">Nuevo</span>';nuevos++;}
+      csvParsed.push({dni,estado,label:estadoLabel,apellidos:row.apellidos||'',nombres:row.nombres||'',ud:row.ud||'',cargo:row.cargo||'',ingreso:row.ingreso||'',cese:row.cese||'',condicion:row.condicion||row.condici||'',nivel:row.nivel||'',carrera:row.carrera||'',celular:row.celular||'',sexo:row.sexo||''});
+    }
+    document.getElementById('csv-nuevos').textContent=nuevos;
+    document.getElementById('csv-dupes').textContent=dupes;
+    document.getElementById('csv-errors').textContent=errors;
+    const tb=document.getElementById('csv-tbody');
+    tb.innerHTML=csvParsed.map((r,i)=>`<tr><td>${i+1}</td><td>${r.label}</td><td>${r.dni}</td><td>${r.apellidos}</td><td>${r.nombres}</td><td>${r.ud}</td><td style="font-size:12px">${r.cargo}</td><td style="font-size:12px">${r.ingreso}</td><td>${r.condicion}</td></tr>`).join('');
+    document.getElementById('csv-preview').style.display='block';
+  };
+  reader.readAsText(file, document.getElementById('csv-enc').value==='latin1'?'ISO-8859-1':'UTF-8');
+}
+
+function confirmarCSV(){
+  const p=getPersonal();
+  let count=0;
+  csvParsed.forEach(r=>{
+    if(r.estado==='error')return;
+    p[r.dni]={apellidos:r.apellidos,nombres:r.nombres,ud:r.ud,cargo:r.cargo,ingreso:r.ingreso,cese:r.cese,condicion:r.condicion,nivel:r.nivel,carrera:r.carrera,celular:r.celular,sexo:r.sexo};
+    count++;
+  });
+  setPersonal(p);
+  alert(`✅ ${count} registros guardados correctamente.`);
+  cancelarCSV();
+}
+
+function cancelarCSV(){
+  document.getElementById('csv-preview').style.display='none';
+  document.getElementById('csv-file').value='';
+  csvParsed=[];
+}
+
+// =========== ACREDITACIONES ===========
+function buscarInspAcred(){
+  const dni=document.getElementById('a-dni').value.trim();
+  const p=getPersonal();
+  const v=p[dni];
+  document.getElementById('a-nombre').value=v?`${v.apellidos} ${v.nombres}`:'No encontrado';
+}
+
+function guardarAcred(){
+  const dni=document.getElementById('a-dni').value.trim();
+  const materia=document.getElementById('a-materia').value;
+  const codigo=document.getElementById('a-codigo').value.trim();
+  const resolucion=document.getElementById('a-resolucion').value.trim();
+  const fecha=document.getElementById('a-fecha').value;
+  const notaTeo=document.getElementById('a-nota-teo').value;
+  const notaPra=document.getElementById('a-nota-pra').value;
+  if(!dni||!materia){showAlert('acred-alert','DNI y Materia son obligatorios','error');return;}
+  const p=getPersonal();
+  if(!p[dni]){showAlert('acred-alert','Inspector no encontrado en la BD','error');return;}
+  const db=getAcred();
+  if(!db[dni])db[dni]=[];
+  db[dni].push({materia,codigo,resolucion,fecha,notaTeo,notaPra,registrado:new Date().toISOString().split('T')[0]});
+  setAcred(db);
+  showAlert('acred-alert','Acreditación registrada correctamente','success');
+  ['a-dni','a-nombre','a-codigo','a-resolucion','a-nota-teo','a-nota-pra'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('a-materia').selectedIndex=0;
+  document.getElementById('a-fecha').value='';
+}
+
+function acredTab(n,el){
+  document.querySelectorAll('#sec-acreditaciones .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('acred-tab-0').style.display=n===0?'block':'none';
+  document.getElementById('acred-tab-1').style.display=n===1?'block':'none';
+  if(n===1)renderAcredConsulta();
+}
+
+function renderAcredConsulta(){
+  const db=getAcred();const p=getPersonal();
+  const rows=[];
+  Object.entries(db).forEach(([dni,arr])=>{
+    const insp=p[dni];
+    arr.forEach(a=>{
+      rows.push({dni,nombre:insp?`${insp.apellidos} ${insp.nombres}`:'—',ud:insp?insp.ud:'—',...a});
+    });
+  });
+  const q=(document.getElementById('search-acred')||{}).value||'';
+  const filtered=rows.filter(r=>!q||r.dni.includes(q)||r.nombre.toLowerCase().includes(q.toLowerCase()));
+  document.getElementById('acred-tbody').innerHTML=filtered.map(r=>`
+    <tr><td>${r.dni}</td><td>${r.nombre}</td><td><span class="ud-badge">${r.ud}</span></td><td><span class="badge badge-blue">${r.materia}</span></td><td>${r.codigo||'—'}</td><td style="font-size:12px">${r.resolucion||'—'}</td><td>${r.fecha||'—'}</td><td>${r.notaTeo||'—'}</td><td>${r.notaPra||'—'}</td></tr>`).join('');
+}
+
+function filtrarAcred(){renderAcredConsulta();}
+
+function exportAcredCSV(){
+  const db=getAcred();const p=getPersonal();
+  let csv='DNI;Apellidos;Nombres;UD;Materia;Codigo SU;Resolucion;Fecha;Nota Teorica;Nota Practica\n';
+  Object.entries(db).forEach(([dni,arr])=>{
+    const insp=p[dni]||{};
+    arr.forEach(a=>{csv+=`${dni};${insp.apellidos||''};${insp.nombres||''};${insp.ud||''};${a.materia};${a.codigo||''};${a.resolucion||''};${a.fecha||''};${a.notaTeo||''};${a.notaPra||''}\n`;});
+  });
+  downloadFile('acreditaciones.csv',csv,'text/csv');
+}
+
+// =========== INSTRUCCIONES ===========
+function instrTab(n,el){
+  document.querySelectorAll('#sec-instrucciones .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('instr-tab-0').style.display=n===0?'block':'none';
+  document.getElementById('instr-tab-1').style.display=n===1?'block':'none';
+  if(n===1)renderInstrLista();
+}
+
+function guardarInstr(){
+  const tipo=document.getElementById('i-tipo').value;
+  const materia=document.getElementById('i-materia').value;
+  const ud=document.getElementById('i-ud').value;
+  if(!tipo||!materia){showAlert('instr-alert','Tipo y Materia son obligatorios','error');return;}
+  const instrs=getInstr();
+  const id='INS-'+Date.now();
+  instrs.push({id,tipo,materia,ud,modalidad:document.getElementById('i-modalidad').value,inicio:document.getElementById('i-inicio').value,fin:document.getElementById('i-fin').value,estado:'Programada',creado:new Date().toISOString().split('T')[0]});
+  setInstr(instrs);
+  showAlert('instr-alert','Instrucción registrada correctamente','success');
+  renderInstrLista();
+}
+
+function renderInstrLista(){
+  const instrs=getInstr();
+  document.getElementById('instr-tbody').innerHTML=instrs.length===0?'<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:24px">Sin instrucciones registradas</td></tr>':instrs.map((i,idx)=>`
+    <tr><td style="font-size:12px;font-family:var(--font-head)">${i.id}</td><td style="font-size:12px">${i.tipo}</td><td><span class="badge badge-blue">${i.materia}</span></td><td><span class="ud-badge">${i.ud||'Todas'}</span></td><td>${i.modalidad}</td><td>${i.inicio||'—'}</td><td>${i.fin||'—'}</td><td><span class="badge badge-green">${i.estado}</span></td><td><button class="btn btn-danger btn-sm" onclick="eliminarInstr(${idx})">✕</button></td></tr>`).join('');
+}
+
+function eliminarInstr(idx){
+  if(!confirm('¿Eliminar esta instrucción?'))return;
+  const instrs=getInstr();instrs.splice(idx,1);setInstr(instrs);renderInstrLista();
+}
+
+// =========== REPORTES ===========
+function renderReportes(){
+  const p=getPersonal();const vals=Object.values(p);
+  const total=vals.length,activos=vals.filter(v=>!v.cese).length,cese=vals.filter(v=>v.cese).length;
+  const acredDB=getAcred();let totalAcred=0;
+  Object.values(acredDB).forEach(arr=>totalAcred+=arr.length);
+  document.getElementById('rep-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total Personal</div></div>
+    <div class="stat-card green"><div class="stat-num" style="color:var(--green)">${activos}</div><div class="stat-label">Activos</div></div>
+    <div class="stat-card red"><div class="stat-num" style="color:var(--red)">${cese}</div><div class="stat-label">Con Cese</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${totalAcred}</div><div class="stat-label">Acreditaciones</div></div>`;
+  // Por UD
+  const byUD={};
+  vals.forEach(v=>{const ud=v.ud||'Sin UD';if(!byUD[ud])byUD[ud]={total:0,activos:0};byUD[ud].total++;if(!v.cese)byUD[ud].activos++;});
+  document.getElementById('rep-ud-tbody').innerHTML=Object.entries(byUD).sort((a,b)=>b[1].total-a[1].total).map(([ud,d])=>`<tr><td><span class="ud-badge">${ud}</span></td><td>${d.total}</td><td style="color:var(--green)">${d.activos}</td></tr>`).join('');
+  // Por materia
+  const byMat={TP:0,SC:0,PM:0,TR:0};
+  Object.values(acredDB).forEach(arr=>arr.forEach(a=>{if(byMat[a.materia]!==undefined)byMat[a.materia]++;}));
+  document.getElementById('rep-acred-tbody').innerHTML=Object.entries(byMat).map(([m,c])=>`<tr><td><span class="badge badge-blue">${m}</span></td><td>${c}</td></tr>`).join('');
+}
+
+// =========== EXPORTAR ===========
+function renderExportar(){
+  const p=getPersonal();
+  document.getElementById('exp-count').textContent=`Registros a exportar: ${Object.keys(p).length}`;
+}
+
+function exportCSV(){
+  const p=getPersonal();
+  let csv='DNI;Apellidos;Nombres;UD;Cargo;Ingreso;Cese;Condicion;Nivel;Carrera;Celular;Sexo\n';
+  Object.entries(p).forEach(([dni,v])=>{csv+=`${dni};${v.apellidos||''};${v.nombres||''};${v.ud||''};${v.cargo||''};${v.ingreso||''};${v.cese||''};${v.condicion||''};${v.nivel||''};${v.carrera||''};${v.celular||''};${v.sexo||''}\n`;});
+  downloadFile('personal_export.csv',csv,'text/csv');
+}
+
+function exportarCSVFull(){
+  const p=getPersonal();
+  const udF=document.getElementById('exp-ud').value;
+  const estF=document.getElementById('exp-estado').value;
+  let csv='DNI;Apellidos;Nombres;UD;Cargo;Ingreso;Cese;Condicion;Nivel;Carrera;Celular;Sexo\n';
+  Object.entries(p).forEach(([dni,v])=>{
+    if(udF && v.ud!==udF)return;
+    if(estF==='activo' && v.cese)return;
+    if(estF==='cese' && !v.cese)return;
+    csv+=`${dni};${v.apellidos||''};${v.nombres||''};${v.ud||''};${v.cargo||''};${v.ingreso||''};${v.cese||''};${v.condicion||''};${v.nivel||''};${v.carrera||''};${v.celular||''};${v.sexo||''}\n`;
+  });
+  downloadFile('personal_export.csv',csv,'text/csv');
+}
+
+function exportarJSON(){
+  const data={personalDB:getPersonal(),acredDB:getAcred(),instrDB:getInstr()};
+  downloadFile('backup_sistema.json',JSON.stringify(data,null,2),'application/json');
+}
+
+// =========== CARGA JSON ===========
+function backupJSON(){exportarJSON();}
+
+function descargarPlantillaJSON(){
+  const tmpl={personalDB:{"12345678":{apellidos:"Garcia Lopez",nombres:"Juan Carlos",ud:"Lima-Callao",cargo:"Inspector",ingreso:"2024-01-15",cese:"",condicion:"CAS",nivel:"Bachiller",carrera:"Derecho",celular:"987654321",sexo:"MASCULINO"}},acredDB:{},instrDB:[]};
+  downloadFile('plantilla_historica.json',JSON.stringify(tmpl,null,2),'application/json');
+}
+
+function cargarJSON(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.personalDB){setPersonal(data.personalDB);}
+      if(data.acredDB){setAcred(data.acredDB);}
+      if(data.instrDB){setInstr(data.instrDB);}
+      const count=Object.keys(data.personalDB||{}).length;
+      document.getElementById('json-alert').innerHTML=`<div class="alert alert-success">✅ Carga exitosa: ${count} inspectores importados correctamente.</div>`;
+    }catch(err){
+      document.getElementById('json-alert').innerHTML=`<div class="alert alert-error">❌ Error al leer el JSON: ${err.message}</div>`;
+    }
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+// =========== USUARIOS ===========
+function renderUsuarios(){
+  const users=getUsuarios();
+  document.getElementById('usr-tbody').innerHTML=Object.entries(users).map(([u,v])=>`
+    <tr><td style="font-family:var(--font-head)">${u}</td><td>${v.nombre||'—'}</td><td><span class="badge ${v.rol==='admin'?'badge-blue':'badge-green'}">${v.rol||'—'}</span></td><td><button class="btn btn-danger btn-sm" onclick="eliminarUsuario('${u}')">✕</button></td></tr>`).join('');
+}
+
+function guardarUsuario(){
+  const u=document.getElementById('u-user').value.trim();
+  const p=document.getElementById('u-pass').value.trim();
+  if(!u||!p){showAlert('usr-alert','Usuario y contraseña son obligatorios','error');return;}
+  const users=getUsuarios();
+  users[u]={pass:p,nombre:document.getElementById('u-nombre').value.trim()||u,rol:document.getElementById('u-rol').value};
+  setUsuarios(users);
+  showAlert('usr-alert','Usuario guardado correctamente','success');
+  ['u-user','u-pass','u-nombre'].forEach(id=>document.getElementById(id).value='');
+  renderUsuarios();
+}
+
+function eliminarUsuario(u){
+  const cu=getData('currentUser',{});
+  if(cu.user===u){alert('No puedes eliminar tu propio usuario.');return;}
+  if(!confirm(`¿Eliminar usuario "${u}"?`))return;
+  const users=getUsuarios();delete users[u];setUsuarios(users);renderUsuarios();
+}
+
+// =========== UTILS ===========
+function showAlert(containerId, msg, type){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  el.innerHTML=`<div class="alert alert-${type==='error'?'error':'success'}">${msg}</div>`;
+  setTimeout(()=>el.innerHTML='',4000);
+}
+
+function downloadFile(name, content, type){
+  const blob=new Blob([content],{type});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=name;
+  a.click();
+}
+</script>
+</body>
+</html>
